@@ -1,12 +1,12 @@
-;;; file-ring.el --- Quickly switch between related files
+;;; file-ring.el --- Quickly switch between related files -*- lexical-binding: t; -*-
 
 ;; Copyright 2019 Adam Niederer
 
 ;; Author: Adam Niederer <adam.niederer@gmail.com>
 ;; URL: http://github.com/AdamNiederer/file-ring
-;; Version: 0.1.0
+;; Version: 1.0.0
 ;; Keywords: files
-;; Package-Requires: ((dash "2.16.0") (s "1.12.0"))
+;; Package-Requires: ((emacs "24.3") (dash "2.16.0") (s "1.12.0"))
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -46,8 +46,10 @@
      (:ext ".component.spec.ts" :key "C-j"))
     ((:ext ".cpp" :key "C-c")
      (:ext ".cc" :key "C-c")
+     (:ext ".c" :key "C-c")
      (:ext ".hpp" :key "C-h")
-     (:ext ".hh" :key "C-h")))
+     (:ext ".hh" :key "C-h")
+     (:ext ".h" :key "C-h")))
   "A list of groups of file exts for quick switching."
   :type '(repeat (repeat (list (const :format "" :ext)
                                (string :format "File Extension: %v")
@@ -115,7 +117,7 @@ If CREATE is set, create files which do not exist, instead of skipping them."
                    (-filter (file-ring--filter create) it)
                    (file-ring--select (buffer-file-name) it selector))))
     (when (not next)
-      (user-error "No other files found"))
+      (user-error "file-ring: no other files found"))
     (find-file next)))
 
 (defun file-ring-next (create)
@@ -155,7 +157,7 @@ create files which do not exist, instead of skipping them."
 (defun file-ring--goto-pick (names existing)
   "Select a file name to open in NAMES, given a subset of names in EXISTING."
   (declare (pure t) (side-effect-free t))
-  (if existing (first existing) (first names)))
+  (if existing (car existing) (car names)))
 
 (defun file-ring-goto ()
   "Open a specific file in the current buffer's file ring, if such a ring exists."
@@ -164,20 +166,21 @@ create files which do not exist, instead of skipping them."
          (key (key-description (list (read-key (file-ring--goto-key-prompt ring)))))
          (nexts (file-ring--goto ring (buffer-file-name) key)))
     (when (not ring)
-      (user-error "This buffer doesn't have a ring"))
+      (user-error "file-ring: this buffer doesn't have a ring"))
     (when (not nexts)
-      (user-error "No such file exists"))
+      (user-error "file-ring: no such file exists"))
     (find-file (file-ring--goto-pick nexts (-filter #'file-exists-p nexts)))))
 
 ;;;###autoload
 (define-minor-mode file-ring-mode
   "Switch between related files quickly."
-  nil " ᶂ"
-  (list
-   (cons (kbd "C-c C-p") #'file-ring-prev)
-   (cons (kbd "C-c C-o") #'file-ring-next)
-   (cons (kbd "C-c C-i") #'file-ring-goto))
-  :group 'file-ring)
+  :init-value nil
+  :lighter " ᶂ"
+  :group file-ring
+  :keymap (list
+           (cons (kbd "C-c C-p") #'file-ring-prev)
+           (cons (kbd "C-c C-o") #'file-ring-next)
+           (cons (kbd "C-c C-i") #'file-ring-goto)))
 
 (provide 'file-ring)
 ;;; file-ring.el ends here
