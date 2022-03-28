@@ -34,7 +34,7 @@
 (defgroup file-ring nil
   "Switch between related files quickly."
   :prefix "file-ring-"
-  :group 'languages
+  :group 'convenience
   :link '(url-link :tag "Github" "https://github.com/AdamNiederer/file-ring")
   :link '(emacs-commentary-link :tag "Commentary" "file-ring"))
 
@@ -50,7 +50,7 @@
      (:ext ".hpp" :key "C-h")
      (:ext ".hh" :key "C-h")
      (:ext ".h" :key "C-h")))
-  "A list of groups of file exts for quick switching."
+  "A list of groups of file extensions for quick switching."
   :type '(repeat (repeat (list (const :format "" :ext)
                                (string :format "File Extension: %v")
                                (const :format "" :key)
