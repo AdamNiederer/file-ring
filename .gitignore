@@ -1,0 +1,17 @@
+# Compiled
+*.elc
+*.eln
+
+# Packaging
+.cask
+
+# Linting
+flycheck_*
+
+# Emacs backup files
+#*
+*#
+*~
+~*
+*.bak
+*.sav
