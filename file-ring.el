@@ -4,7 +4,7 @@
 
 ;; Author: Adam Niederer <adam.niederer@gmail.com>
 ;; URL: http://github.com/AdamNiederer/file-ring
-;; Version: 1.1.0
+;; Version: 2.0.0
 ;; Keywords: files
 ;; Package-Requires: ((emacs "24.4") (dash "2.16.0"))
 
@@ -38,7 +38,7 @@
   :link '(url-link :tag "Github" "https://github.com/AdamNiederer/file-ring")
   :link '(emacs-commentary-link :tag "Commentary" "file-ring"))
 
-(defcustom file-ring--rings
+(defcustom file-ring-rings
   '(((:ext ".component.ts" :key "C-t")
      (:ext ".component.scss" :key "C-s")
      (:ext ".component.sass" :key "C-s")
@@ -117,7 +117,7 @@ If CREATE is set, allow nonexisting files to pass the predicate."
   "Open the next file in the current buffer's file ring using SELECTOR.
 
 If CREATE is set, create files which do not exist, instead of skipping them."
-  (let ((next (--> (file-ring--list file-ring--rings (buffer-file-name))
+  (let ((next (--> (file-ring--list file-ring-rings (buffer-file-name))
                    (-filter (file-ring--filter create) it)
                    (file-ring--select (buffer-file-name) it selector))))
     (when (not next)
@@ -166,7 +166,7 @@ create files which do not exist, instead of skipping them."
 (defun file-ring-goto ()
   "Open a specific file in the current buffer's file ring, if such a ring exists."
   (interactive)
-  (let* ((ring (file-ring--ring-for file-ring--rings (buffer-file-name)))
+  (let* ((ring (file-ring--ring-for file-ring-rings (buffer-file-name)))
          (key (key-description (list (read-key (file-ring--goto-key-prompt ring)))))
          (nexts (file-ring--goto ring (buffer-file-name) key)))
     (when (not ring)
