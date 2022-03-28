@@ -6,7 +6,7 @@
 ;; URL: http://github.com/AdamNiederer/file-ring
 ;; Version: 1.0.0
 ;; Keywords: files
-;; Package-Requires: ((emacs "24.3") (dash "2.16.0") (s "1.12.0"))
+;; Package-Requires: ((emacs "24.4") (dash "2.16.0"))
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 ;;; Code:
 
 (require 'dash)
-(require 's)
+(require 'subr-x)
 
 (defgroup file-ring nil
   "Switch between related files quickly."
@@ -58,17 +58,21 @@
                                        (string :tag "Quick-Switch Key" :format "Quick-Switch Key: %v")))))
   :group 'file-ring)
 
+(defun file-ring--string-ends-with (suffix string)
+  "Return whether STRING ends with SUFFIX."
+  (string-match-p (concat suffix "$") string))
+
 (defun file-ring--ring-for (rings name)
   "Find the ring for the file with name NAME in RINGS."
   (declare (pure t) (side-effect-free t))
-  (--find (--some (s-ends-with? it name) (--map (plist-get it :ext) it)) rings))
+  (--find (--some (file-ring--string-ends-with it name) (--map (plist-get it :ext) it)) rings))
 
 (defun file-ring--base-for (rings name)
   "Find the basename for the file with name NAME in RINGS."
   (declare (pure t) (side-effect-free t))
   (let ((base (file-name-nondirectory name))
         (ext (file-ring--ext-for rings name)))
-    (if (and ext (s-ends-with? ext base))
+    (if (and ext (file-ring--string-ends-with ext base))
         (substring base 0 (- (length base) (length ext)))
       base)))
 
@@ -77,7 +81,7 @@
   (declare (pure t) (side-effect-free t))
   (->> (-flatten-n 1 rings)
        (--map (plist-get it :ext))
-       (--find (s-ends-with? it name))))
+       (--find (file-ring--string-ends-with it name))))
 
 (defun file-ring--rotate-around (el list)
   "Rotate LIST such that EL is at the beginning."
@@ -92,7 +96,7 @@
         (base (file-ring--base-for rings buffer-name)))
     (->> (file-ring--ring-for rings name)
          (--map (plist-get it :ext))
-         (--map (s-concat base it)))))
+         (--map (concat base it)))))
 
 (defun file-ring--select (buffer-name names selector)
   "Find the name of the a file in NAMES, according to BUFFER-NAME and SELECTOR."
@@ -143,8 +147,8 @@ create files which do not exist, instead of skipping them."
        (--filter (plist-get it :key) it)
        (--map (plist-get it :key) it)
        (-uniq it)
-       (s-join ", " it)
-       (s-concat "Go to buffer (" it "):")))
+       (string-join it ", ")
+       (concat "Go to buffer (" it "):")))
 
 (defun file-ring--goto (ring name key)
   "Find the filenames in RING with basenane NAME corresponding to KEY."
@@ -152,7 +156,7 @@ create files which do not exist, instead of skipping them."
   (let ((base (file-ring--base-for (list ring) name)))
     (--> ring
          (--filter (equal (plist-get it :key) key) it)
-         (--map (s-concat base (plist-get it :ext)) it))))
+         (--map (concat base (plist-get it :ext)) it))))
 
 (defun file-ring--goto-pick (names existing)
   "Select a file name to open in NAMES, given a subset of names in EXISTING."
