@@ -4,7 +4,7 @@
 
 ;; Author: Adam Niederer <adam.niederer@gmail.com>
 ;; URL: http://github.com/AdamNiederer/file-ring
-;; Version: 1.0.0
+;; Version: 1.1.0
 ;; Keywords: files
 ;; Package-Requires: ((emacs "24.4") (dash "2.16.0"))
 
@@ -145,7 +145,7 @@ create files which do not exist, instead of skipping them."
   (declare (pure t) (side-effect-free t))
   (--> ring
        (--filter (plist-get it :key) it)
-       (--map (plist-get it :key) it)
+       (--map (concat (plist-get it :ext) ": " (plist-get it :key)) it)
        (-uniq it)
        (string-join it ", ")
        (concat "Go to buffer (" it "):")))
